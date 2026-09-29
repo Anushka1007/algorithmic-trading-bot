@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+sqlalchemy
+pandas
+numpy
+httpx
+pytest
+pytest-asyncio
