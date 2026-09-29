@@ -67,18 +67,70 @@ def reset_paper_trading(db: Session = Depends(get_db)):
     db.commit()
     return {"status": "success", "message": "Paper trading data reset successfully."}
 
-bot_state = {"running": False}
+import asyncio
+import logging
+from backend.database import SessionLocal
+from backend.trading.strategy import generate_signal
+
+logger = logging.getLogger(__name__)
+
+bot_state = {"running": False, "task": None}
+
+async def run_bot_loop():
+    symbol = "AAPL"
+    while bot_state["running"]:
+        try:
+            client = TwelveDataClient()
+            db = SessionLocal()
+            try:
+                history = await client.get_history(symbol, interval="1day", outputsize=100)
+                signal_res = generate_signal(symbol, history)
+                
+                if signal_res.signal in ["BUY", "SELL"]:
+                    trader = PaperTrader(db, client)
+                    status = await trader.get_portfolio_status()
+                    current_position = next((p for p in status.open_positions if p.symbol == symbol), None)
+                    
+                    should_trade = False
+                    if signal_res.signal == "BUY" and not current_position:
+                        should_trade = True
+                    elif signal_res.signal == "SELL" and current_position:
+                        should_trade = True
+                        
+                    if should_trade:
+                        quantity = current_position.quantity if current_position else 10
+                        req = schemas.PaperOrderRequest(
+                            symbol=symbol,
+                            side=signal_res.signal,
+                            quantity=quantity
+                        )
+                        try:
+                            await trader.execute_order(req)
+                        except ValueError as e:
+                            logger.error(f"Paper execution rejected: {e}")
+            finally:
+                db.close()
+        except Exception as e:
+            logger.error(f"Bot loop error: {e}")
+            
+        for _ in range(60):
+            if not bot_state["running"]:
+                break
+            await asyncio.sleep(1)
 
 @router.post("/bot/start")
-def start_bot():
-    bot_state["running"] = True
+async def start_bot():
+    if not bot_state["running"]:
+        bot_state["running"] = True
+        if bot_state["task"] is None or bot_state["task"].done():
+            bot_state["task"] = asyncio.create_task(run_bot_loop())
     return {"status": "success", "message": "Bot started.", "running": True}
 
 @router.post("/bot/stop")
-def stop_bot():
+async def stop_bot():
     bot_state["running"] = False
     return {"status": "success", "message": "Bot stopped.", "running": False}
 
 @router.get("/bot/status")
-def get_bot_status():
+async def get_bot_status():
     return {"running": bot_state["running"]}
