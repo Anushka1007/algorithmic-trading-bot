@@ -74,11 +74,25 @@ from backend.trading.strategy import generate_signal
 
 logger = logging.getLogger(__name__)
 
-bot_state = {"running": False, "task": None}
+import datetime
+
+bot_state = {
+    "running": False, 
+    "task": None,
+    "symbol": "AAPL",
+    "signal": "-",
+    "last_check": None,
+    "next_check": None,
+    "last_action": "-",
+    "error": None
+}
 
 async def run_bot_loop():
     symbol = "AAPL"
+    bot_state["symbol"] = symbol
     while bot_state["running"]:
+        bot_state["last_check"] = datetime.datetime.now().strftime("%H:%M:%S")
+        bot_state["error"] = None
         try:
             client = TwelveDataClient()
             db = SessionLocal()
@@ -86,16 +100,25 @@ async def run_bot_loop():
                 history = await client.get_history(symbol, interval="1day", outputsize=100)
                 signal_res = generate_signal(symbol, history)
                 
+                bot_state["signal"] = signal_res.signal
+                
                 if signal_res.signal in ["BUY", "SELL"]:
                     trader = PaperTrader(db, client)
                     status = await trader.get_portfolio_status()
                     current_position = next((p for p in status.open_positions if p.symbol == symbol), None)
                     
                     should_trade = False
-                    if signal_res.signal == "BUY" and not current_position:
-                        should_trade = True
-                    elif signal_res.signal == "SELL" and current_position:
-                        should_trade = True
+                    reason = ""
+                    if signal_res.signal == "BUY":
+                        if not current_position:
+                            should_trade = True
+                        else:
+                            reason = "Already have a position"
+                    elif signal_res.signal == "SELL":
+                        if current_position:
+                            should_trade = True
+                        else:
+                            reason = "No position to sell"
                         
                     if should_trade:
                         quantity = current_position.quantity if current_position else 10
@@ -106,12 +129,23 @@ async def run_bot_loop():
                         )
                         try:
                             await trader.execute_order(req)
+                            bot_state["last_action"] = f"{signal_res.signal} {quantity} {symbol} executed"
                         except ValueError as e:
+                            bot_state["last_action"] = f"Trade rejected: {e}"
                             logger.error(f"Paper execution rejected: {e}")
+                    else:
+                        bot_state["last_action"] = f"No trade — {reason}"
+                else:
+                    bot_state["last_action"] = "No trade — waiting for signal"
             finally:
                 db.close()
         except Exception as e:
+            bot_state["error"] = str(e)
+            bot_state["last_action"] = "Error while checking signal"
             logger.error(f"Bot loop error: {e}")
+            
+        next_time = datetime.datetime.now() + datetime.timedelta(seconds=60)
+        bot_state["next_check"] = f"~{next_time.strftime('%H:%M:%S')}"
             
         for _ in range(60):
             if not bot_state["running"]:
@@ -129,8 +163,17 @@ async def start_bot():
 @router.post("/bot/stop")
 async def stop_bot():
     bot_state["running"] = False
+    bot_state["last_action"] = "Bot stopped"
     return {"status": "success", "message": "Bot stopped.", "running": False}
 
 @router.get("/bot/status")
 async def get_bot_status():
-    return {"running": bot_state["running"]}
+    return {
+        "running": bot_state["running"],
+        "symbol": bot_state["symbol"],
+        "signal": bot_state["signal"],
+        "last_check": bot_state["last_check"],
+        "next_check": bot_state["next_check"],
+        "last_action": bot_state["last_action"],
+        "error": bot_state["error"]
+    }

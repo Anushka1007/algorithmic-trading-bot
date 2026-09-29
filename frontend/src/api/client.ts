@@ -3,6 +3,16 @@ import type {
   OrderRequest, Trade, BacktestRequest, BacktestResult
 } from '../types/api';
 
+export interface BotStatus {
+  running: boolean;
+  symbol: string;
+  signal: string;
+  last_check: string | null;
+  next_check: string | null;
+  last_action: string;
+  error: string | null;
+}
+
 const API_BASE = 'http://localhost:8000/api';
 
 export const apiClient = {
@@ -84,7 +94,7 @@ export const apiClient = {
     return res.json();
   },
 
-  getBotStatus: async (): Promise<{ running: boolean }> => {
+  getBotStatus: async (): Promise<BotStatus> => {
     const res = await fetch(`${API_BASE}/paper/bot/status`);
     if (!res.ok) throw new Error(await res.text());
     return res.json();

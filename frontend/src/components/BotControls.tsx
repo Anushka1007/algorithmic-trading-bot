@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../api/client';
+import type { BotStatus } from '../api/client';
 import { Play, Square, Activity } from 'lucide-react';
 
 export const BotControls: React.FC = () => {
+  const [statusObj, setStatusObj] = useState<BotStatus | null>(null);
   const [running, setRunning] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const fetchStatus = async () => {
     try {
       const status = await apiClient.getBotStatus();
+      setStatusObj(status);
       setRunning(status.running);
     } catch (e) {
       // Ignore
@@ -24,14 +27,14 @@ export const BotControls: React.FC = () => {
   const handleStart = async () => {
     setLoading(true);
     await apiClient.startBot();
-    setRunning(true);
+    await fetchStatus();
     setLoading(false);
   };
 
   const handleStop = async () => {
     setLoading(true);
     await apiClient.stopBot();
-    setRunning(false);
+    await fetchStatus();
     setLoading(false);
   };
 
@@ -48,6 +51,30 @@ export const BotControls: React.FC = () => {
           </span>
         </div>
       </div>
+
+      {statusObj && running && (
+        <div className="text-xs text-gray-400 space-y-1.5 bg-[#0b0e14] p-3 rounded-lg border border-[#232833]">
+          <div className="flex justify-between"><span>Symbol:</span> <span className="text-white font-mono">{statusObj.symbol}</span></div>
+          <div className="flex justify-between"><span>Signal:</span> <span className={`font-bold ${statusObj.signal === 'BUY' ? 'text-emerald-400' : statusObj.signal === 'SELL' ? 'text-rose-400' : 'text-gray-300'}`}>{statusObj.signal}</span></div>
+          <div className="flex justify-between"><span>Last Check:</span> <span className="text-white font-mono">{statusObj.last_check || '-'}</span></div>
+          <div className="flex justify-between"><span>Next Check:</span> <span className="text-white font-mono">{statusObj.next_check || '-'}</span></div>
+          <div className="mt-2 pt-2 border-t border-[#232833]">
+            <span className="block mb-1">Action:</span>
+            {statusObj.error ? (
+              <span className="text-rose-400 break-words font-medium">Error: {statusObj.error}</span>
+            ) : (
+              <span className="text-emerald-400 break-words font-medium">{statusObj.last_action}</span>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {statusObj && !running && statusObj.last_check && (
+        <div className="text-xs text-gray-400 space-y-1.5 bg-[#0b0e14] p-3 rounded-lg border border-[#232833]">
+          <div className="flex justify-between"><span>Last Action:</span> <span className="text-white">{statusObj.last_action}</span></div>
+          <div className="flex justify-between"><span>Last Check:</span> <span className="text-white font-mono">{statusObj.last_check}</span></div>
+        </div>
+      )}
 
       <div>
         {!running ? (
