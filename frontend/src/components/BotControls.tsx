@@ -36,12 +36,12 @@ export const BotControls: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#151924] rounded-xl border border-[#232833] p-4 flex flex-col h-full justify-between">
+    <div className="bg-[#151924] rounded-xl border border-[#232833] p-4 flex flex-col gap-4">
       <div>
         <h3 className="font-semibold text-gray-300 flex items-center mb-4">
           <Activity className="w-4 h-4 mr-2" /> Paper Bot Engine
         </h3>
-        <div className="flex items-center space-x-2 mb-4">
+        <div className="flex items-center space-x-2">
           <div className={`w-3 h-3 rounded-full ${running ? 'bg-emerald-500 animate-pulse' : 'bg-gray-500'}`}></div>
           <span className="text-sm font-mono text-gray-300">
             STATUS: {running ? 'RUNNING' : 'STOPPED'}
@@ -49,21 +49,24 @@ export const BotControls: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex gap-2 mt-auto">
-        <button 
-          onClick={handleStart}
-          disabled={running || loading}
-          className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded-lg font-bold flex items-center justify-center transition-colors"
-        >
-          <Play className="w-4 h-4 mr-2" /> Start
-        </button>
-        <button 
-          onClick={handleStop}
-          disabled={!running || loading}
-          className="flex-1 py-2 bg-rose-600 hover:bg-rose-500 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded-lg font-bold flex items-center justify-center transition-colors"
-        >
-          <Square className="w-4 h-4 mr-2" /> Stop
-        </button>
+      <div>
+        {!running ? (
+          <button 
+            onClick={handleStart}
+            disabled={loading}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded-lg font-bold flex items-center justify-center transition-colors"
+          >
+            <Play className="w-5 h-5 mr-2" /> START BOT
+          </button>
+        ) : (
+          <button 
+            onClick={handleStop}
+            disabled={loading}
+            className="w-full py-3 bg-rose-600 hover:bg-rose-500 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded-lg font-bold flex items-center justify-center transition-colors"
+          >
+            <Square className="w-5 h-5 mr-2" /> STOP BOT
+          </button>
+        )}
       </div>
     </div>
   );

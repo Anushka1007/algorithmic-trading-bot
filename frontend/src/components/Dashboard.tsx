@@ -132,9 +132,7 @@ export const Dashboard: React.FC = () => {
               <div className="pt-2"></div>
             </div>
           </div>
-          <div className="grid grid-cols-1">
-             <AIPanel symbol={symbol} />
-          </div>
+          <AIPanel symbol={symbol} />
         </>
       ) : (
         <BacktestView />
