@@ -113,3 +113,27 @@ class BacktestResult(BaseModel):
     metrics: BacktestMetrics
     trades: List[TradeRecord]
     equity_curve: List[EquityPoint]
+
+class PaperOrderRequest(BaseModel):
+    symbol: str
+    side: str
+    quantity: int
+    stop_loss: Optional[float] = None
+    take_profit: Optional[float] = None
+
+class PositionResponse(BaseModel):
+    symbol: str
+    quantity: int
+    average_entry_price: float
+    current_price: float
+    unrealized_pnl: float
+    stop_loss: Optional[float] = None
+    take_profit: Optional[float] = None
+
+class PortfolioResponse(BaseModel):
+    cash: float
+    portfolio_value: float
+    realized_pnl: float
+    unrealized_pnl: float
+    total_return: float
+    open_positions: List[PositionResponse]

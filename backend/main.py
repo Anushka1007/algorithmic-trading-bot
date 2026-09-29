@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
-from .routers import market, signals, backtest
+from .routers import market, signals, backtest, paper
+from .database import engine, Base
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Algorithmic Trading Bot API")
 
@@ -16,6 +19,7 @@ app.add_middleware(
 app.include_router(market.router)
 app.include_router(signals.router)
 app.include_router(backtest.router)
+app.include_router(paper.router)
 
 @app.get("/api/health")
 def health_check():
