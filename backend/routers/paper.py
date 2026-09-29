@@ -66,3 +66,19 @@ def reset_paper_trading(db: Session = Depends(get_db)):
     db.query(models.PortfolioSnapshot).delete()
     db.commit()
     return {"status": "success", "message": "Paper trading data reset successfully."}
+
+bot_state = {"running": False}
+
+@router.post("/bot/start")
+def start_bot():
+    bot_state["running"] = True
+    return {"status": "success", "message": "Bot started.", "running": True}
+
+@router.post("/bot/stop")
+def stop_bot():
+    bot_state["running"] = False
+    return {"status": "success", "message": "Bot stopped.", "running": False}
+
+@router.get("/bot/status")
+def get_bot_status():
+    return {"running": bot_state["running"]}

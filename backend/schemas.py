@@ -137,3 +137,10 @@ class PortfolioResponse(BaseModel):
     unrealized_pnl: float
     total_return: float
     open_positions: List[PositionResponse]
+
+class AIChatRequest(BaseModel):
+    message: str
+    symbol: Optional[str] = None
+
+class AIChatResponse(BaseModel):
+    reply: str

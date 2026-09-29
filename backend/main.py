@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
-from .routers import market, signals, backtest, paper
+from .routers import market, signals, backtest, paper, ai
 from .database import engine, Base
 
 Base.metadata.create_all(bind=engine)
@@ -20,6 +20,7 @@ app.include_router(market.router)
 app.include_router(signals.router)
 app.include_router(backtest.router)
 app.include_router(paper.router)
+app.include_router(ai.router)
 
 @app.get("/api/health")
 def health_check():

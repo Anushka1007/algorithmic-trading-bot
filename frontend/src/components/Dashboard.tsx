@@ -8,6 +8,8 @@ import { PaperOrderForm } from './PaperOrderForm';
 import { TradesTable } from './TradesTable';
 import { BacktestView } from './BacktestView';
 import { Watchlist } from './Watchlist';
+import { AIPanel } from './AIPanel';
+import { BotControls } from './BotControls';
 import { RefreshCw, Search } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
@@ -116,6 +118,7 @@ export const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="lg:col-span-1 space-y-6">
               <Watchlist onSelect={(s) => { setSymbol(s); setSearchInput(s); }} />
+              <BotControls />
             </div>
             
             <div className="lg:col-span-2 space-y-6">
@@ -126,7 +129,11 @@ export const Dashboard: React.FC = () => {
             <div className="lg:col-span-1 space-y-6 flex flex-col h-full">
               <SignalCard signal={signal} quote={quote} symbol={symbol} />
               <PaperOrderForm symbol={symbol} onOrderSuccess={fetchData} />
+              <div className="pt-2"></div>
             </div>
+          </div>
+          <div className="grid grid-cols-1">
+             <AIPanel symbol={symbol} />
           </div>
         </>
       ) : (

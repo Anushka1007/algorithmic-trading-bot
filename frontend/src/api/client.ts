@@ -60,5 +60,33 @@ export const apiClient = {
     });
     if (!res.ok) throw new Error(await res.text());
     return res.json();
+  },
+
+  chatAi: async (message: string, symbol?: string): Promise<{ reply: string }> => {
+    const res = await fetch(`${API_BASE}/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, symbol })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+
+  startBot: async (): Promise<any> => {
+    const res = await fetch(`${API_BASE}/paper/bot/start`, { method: 'POST' });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+
+  stopBot: async (): Promise<any> => {
+    const res = await fetch(`${API_BASE}/paper/bot/stop`, { method: 'POST' });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+
+  getBotStatus: async (): Promise<{ running: boolean }> => {
+    const res = await fetch(`${API_BASE}/paper/bot/status`);
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
   }
 };

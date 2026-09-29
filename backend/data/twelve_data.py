@@ -16,7 +16,7 @@ class TwelveDataClient:
         self.api_key = api_key or settings.twelve_data_api_key
 
     async def get_quote(self, symbol: str) -> Quote:
-        if not self.api_key or self.api_key.startswith("dummy"):
+        if not self.api_key or self.api_key.startswith("dummy") or self.api_key == "your_twelve_data_key_here":
             raise HTTPException(status_code=500, detail="Twelve Data API key is missing or dummy.")
             
         async with httpx.AsyncClient() as client:
@@ -54,7 +54,7 @@ class TwelveDataClient:
                 cached_data.is_cached = True
                 return cached_data
 
-        if not self.api_key or self.api_key.startswith("dummy"):
+        if not self.api_key or self.api_key.startswith("dummy") or self.api_key == "your_twelve_data_key_here":
             raise HTTPException(status_code=500, detail="Twelve Data API key is missing or dummy.")
 
         async with httpx.AsyncClient() as client:
