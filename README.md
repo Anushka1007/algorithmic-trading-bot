@@ -22,14 +22,14 @@ This is a full-stack algorithmic trading and paper-trading platform combining li
 ---
 
 ## Screenshots
+<img width="1262" height="789" alt="image" src="https://github.com/user-attachments/assets/5172b598-6d98-4dcb-8ef7-861420814593" />
 
-![Dashboard](screenshots/dashboard.png)
+<img width="1243" height="698" alt="image" src="https://github.com/user-attachments/assets/d9cb76f3-0f03-4cce-951c-e1bc62b26435" />
 
-![Bot Observability](screenshots/bot.png)
 
-![Backtesting Engine](screenshots/backtest.png)
+<img width="1270" height="635" alt="image" src="https://github.com/user-attachments/assets/a58cfe70-aea4-42ad-b0fd-c5748381ebbc" />
+<img width="1036" height="612" alt="image" src="https://github.com/user-attachments/assets/0dc3ebcb-fe32-4a4f-a2c4-5f96a296851a" />
 
-![AI Assistant](screenshots/ai-assistant.png)
 
 ---
 
